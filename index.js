@@ -7,10 +7,18 @@ const app = express()
 const serverKey = process.env.SERVER_KEY || ''
 const wsStorage = {}
 
-const notificationToData = notification => ({
-  title: notification.type,
-  body: notification.status ? notification.status.content : notification.account.acct
-})
+const notificationToData = notification => {
+  switch(notification.type) {
+  case 'mention':
+    return { title: `${notification.account.acct} mentioned you`, body: notification.status.content }
+  case 'follow':
+    return { title: 'New follower', body: notification.account.acct }
+  case 'reblog':
+    return { title: `${notification.account.acct} boosted your toot`, body: notification.status.content }
+  case 'favourite'
+    return { title: `${notification.account.acct} favourited your toot`, body: notification.status.content }
+  }
+}
 
 const connectForUser = (baseUrl, accessToken, deviceToken) => {
   console.log(`New connection for ${baseUrl}: ${deviceToken}`)
@@ -31,7 +39,7 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
     const firebaseMessage = {
       registration_ids: [deviceToken],
       priority: 'high',
-      data: notificationToData(json.payload)
+      data: notificationToData(JSON.parse(json.payload))
     }
 
     axios.post('https://fcm.googleapis.com/fcm/send', JSON.stringify(firebaseMessage), {
