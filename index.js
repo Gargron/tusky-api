@@ -21,6 +21,11 @@ const notificationToData = notification => {
 }
 
 const connectForUser = (baseUrl, accessToken, deviceToken) => {
+  if (typeof wsStorage[`${baseUrl}:${accessToken}`] !== 'undefined') {
+    console.log(`Already registered ${baseUrl}: ${deviceToken}`)
+    return
+  }
+
   console.log(`New connection for ${baseUrl}: ${deviceToken}`)
 
   const ws = new WebSocket(`${baseUrl}/api/v1/streaming/?access_token=${accessToken}&stream=user`)
