@@ -7,19 +7,6 @@ const app = express()
 const serverKey = process.env.SERVER_KEY || ''
 const wsStorage = {}
 
-const notificationToData = notification => {
-  switch(notification.type) {
-  case 'mention':
-    return { title: `${notification.account.acct} mentioned you`, body: notification.status.content }
-  case 'follow':
-    return { title: 'New follower', body: notification.account.acct }
-  case 'reblog':
-    return { title: `${notification.account.acct} boosted your toot`, body: notification.status.content }
-  case 'favourite':
-    return { title: `${notification.account.acct} favourited your toot`, body: notification.status.content }
-  }
-}
-
 const connectForUser = (baseUrl, accessToken, deviceToken) => {
   if (typeof wsStorage[`${baseUrl}:${accessToken}`] !== 'undefined') {
     console.log(`Already registered ${baseUrl}: ${deviceToken}`)
@@ -46,7 +33,6 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
     const firebaseMessage = {
       to: deviceToken,
       priority: 'high',
-      notification: notificationToData(payload),
       data: { notification_id: payload.id }
     }
 
