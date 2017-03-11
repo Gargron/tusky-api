@@ -12,12 +12,16 @@ const notificationToData = notification => ({
 })
 
 const connectForUser = (baseUrl, accessToken, deviceToken) => {
-  const ws = new WebSocket(`${baseUrl}/api/v1/streaming/user?access_token=${accessToken}`)
+  console.log(`New connection for ${baseUrl}: ${deviceToken}`)
+
+  const ws = new WebSocket(`${baseUrl}/api/v1/streaming/?access_token=${accessToken}&stream=user`)
 
   wsStorage[`${baseUrl}:${accessToken}`] = ws;
 
   ws.on('message', data => {
     const json = JSON.parse(data)
+
+    console.log(`New notification for ${deviceToken}: ${json.event}`)
 
     if (json.event !== 'notification') {
       return
