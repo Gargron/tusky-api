@@ -44,17 +44,17 @@ const disconnectForUser = (baseUrl, accessToken) => {
 }
 
 app.get('/', (req, res) => {
-  res.status(204).send('no')
+  res.sendStatus(204)
 })
 
 app.post('/register', (req, res) => {
   connectForUser(req.params.instance_url, req.params.access_token, req.params.device_token)
-  res.status(201).send('')
+  res.sendStatus(201)
 })
 
 app.post('/unregister', (req, res) => {
   disconnectForUser(req.params.instance_url, req.params.access_token)
-  res.status(201).send('')
+  res.sendStatus(201)
 })
 
 app.listen(3000, () => {
