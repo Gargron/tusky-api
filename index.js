@@ -54,9 +54,9 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
         'Content-Type': 'application/json'
       }
     }).then(response => {
-      console.log(`Sent to FCM: ${response.data}`)
+      console.log(`Sent to FCM, status ${response.status}: ${JSON.stringify(response.data)}`)
     }).catch(error => {
-      console.error(`Error sending to FCM: ${error}`)
+      console.error(`Error sending to FCM, status: ${error.response.status}: ${JSON.stringify(error.response.data)}`)
     })
   })
 }
