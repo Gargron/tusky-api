@@ -37,14 +37,16 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
     }
 
     const firebaseMessage = {
-      registration_ids: [deviceToken],
+      to: deviceToken,
       priority: 'high',
-      data: notificationToData(JSON.parse(json.payload))
+      notification: notificationToData(JSON.parse(json.payload)),
+      data: { payload: json.payload }
     }
 
     axios.post('https://fcm.googleapis.com/fcm/send', JSON.stringify(firebaseMessage), {
       headers: {
-        Authorization: `key=${serverKey}`
+        'Authorization': `key=${serverKey}`,
+        'Content-Type': 'application/json'
       }
     }).then(response => {
       console.log(`Sent to FCM: ${response.data}`)
