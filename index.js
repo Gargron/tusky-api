@@ -47,7 +47,7 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
         Authorization: `key=${serverKey}`
       }
     }).then(response => {
-      console.log(`Sent to FCM: ${response.body}`)
+      console.log(`Sent to FCM: ${response.data}`)
     }).catch(error => {
       console.error(`Error sending to FCM: ${error}`)
     })
