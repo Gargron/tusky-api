@@ -1,6 +1,7 @@
 import WebSocket from 'ws'
 import express from 'express'
 import axios from 'axios'
+import bodyParser from 'body-parser'
 
 const app = express()
 const serverKey = process.env.SERVER_KEY || ''
@@ -47,17 +48,19 @@ const disconnectForUser = (baseUrl, accessToken) => {
   delete wsStorage[`${baseUrl}:${accessToken}`]
 }
 
+app.use(bodyParser.urlencoded({ extended: true }))
+
 app.get('/', (req, res) => {
   res.sendStatus(204)
 })
 
 app.post('/register', (req, res) => {
-  connectForUser(req.params.instance_url, req.params.access_token, req.params.device_token)
+  connectForUser(req.body.instance_url, req.body.access_token, req.body.device_token)
   res.sendStatus(201)
 })
 
 app.post('/unregister', (req, res) => {
-  disconnectForUser(req.params.instance_url, req.params.access_token)
+  disconnectForUser(req.body.instance_url, req.body.access_token)
   res.sendStatus(201)
 })
 
