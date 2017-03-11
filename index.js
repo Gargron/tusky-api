@@ -41,11 +41,13 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
       return
     }
 
+    const payload = JSON.parse(json.payload)
+
     const firebaseMessage = {
       to: deviceToken,
       priority: 'high',
-      notification: notificationToData(JSON.parse(json.payload)),
-      data: { payload: json.payload }
+      notification: notificationToData(payload),
+      data: { notification_id: payload.id }
     }
 
     axios.post('https://fcm.googleapis.com/fcm/send', JSON.stringify(firebaseMessage), {
