@@ -15,7 +15,7 @@ const notificationToData = notification => {
     return { title: 'New follower', body: notification.account.acct }
   case 'reblog':
     return { title: `${notification.account.acct} boosted your toot`, body: notification.status.content }
-  case 'favourite'
+  case 'favourite':
     return { title: `${notification.account.acct} favourited your toot`, body: notification.status.content }
   }
 }
