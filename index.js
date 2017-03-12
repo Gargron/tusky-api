@@ -2,27 +2,26 @@ import WebSocket from 'ws'
 import express from 'express'
 import axios from 'axios'
 import bodyParser from 'body-parser'
+import npmlog from 'npmlog'
 
 const app = express()
 const serverKey = process.env.SERVER_KEY || ''
 const wsStorage = {}
 
 const connectForUser = (baseUrl, accessToken, deviceToken) => {
+  const log = (level, message) => npmlog.log(level, `${baseUrl}:${accessToken}`, message)
+
   if (typeof wsStorage[`${baseUrl}:${accessToken}`] !== 'undefined') {
-    console.log(`Already registered ${baseUrl}: ${deviceToken}`)
+    log('info', `Already registered: ${deviceToken}`)
     return
   }
 
-  console.log(`New connection for ${baseUrl}: ${deviceToken}`)
+  log('info', `New registration: ${deviceToken}`)
 
-  const ws = new WebSocket(`${baseUrl}/api/v1/streaming/?access_token=${accessToken}&stream=user`)
-
-  wsStorage[`${baseUrl}:${accessToken}`] = ws;
-
-  ws.on('message', data => {
+  const onMessage = data => {
     const json = JSON.parse(data)
 
-    console.log(`New notification for ${deviceToken}: ${json.event}`)
+    log('info', `New notification: ${json.event}`)
 
     if (json.event !== 'notification') {
       return
@@ -42,11 +41,39 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
         'Content-Type': 'application/json'
       }
     }).then(response => {
-      console.log(`Sent to FCM, status ${response.status}: ${JSON.stringify(response.data)}`)
+      log('info', `Sent to FCM, status ${response.status}: ${JSON.stringify(response.data)}`)
     }).catch(error => {
-      console.error(`Error sending to FCM, status: ${error.response.status}: ${JSON.stringify(error.response.data)}`)
+      log('error', `Error sending to FCM, status: ${error.response.status}: ${JSON.stringify(error.response.data)}`)
     })
   })
+
+  const onError = error => {
+    log('error', error)
+    setTimeout(() => reconnect(), 5000)
+  })
+
+  const onClose = code => {
+    if (code === 1000) {
+      log('info', 'Remote server closed connection')
+      return
+    }
+
+    log('error', `Unexpected close: ${code}`)
+    setTimeout(() => reconnect(), 5000)
+  })
+
+  const reconnect = () => {
+    const ws = new WebSocket(`${baseUrl}/api/v1/streaming/?access_token=${accessToken}&stream=user`)
+
+    ws.on('open', () => log('info', 'Connected'))
+    ws.on('message', onMessage)
+    ws.on('error', onError)
+    ws.on('close', onClose)
+
+    wsStorage[`${baseUrl}:${accessToken}`] = ws;
+  }
+
+  reconnect()
 }
 
 const disconnectForUser = (baseUrl, accessToken) => {
