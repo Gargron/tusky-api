@@ -16,6 +16,8 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
     return
   }
 
+  let heartbeat
+
   log('info', `New registration: ${deviceToken}`)
 
   const onMessage = data => {
@@ -55,6 +57,7 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
   const onClose = code => {
     if (code === 1000) {
       log('info', 'Remote server closed connection')
+      clearInterval(heartbeat)
       return
     }
 
@@ -63,9 +66,15 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
   }
 
   const reconnect = () => {
+    clearInterval(heartbeat)
+
     const ws = new WebSocket(`${baseUrl}/api/v1/streaming/?access_token=${accessToken}&stream=user`)
 
-    ws.on('open', () => log('info', 'Connected'))
+    ws.on('open', () => {
+      log('info', 'Connected')
+      heartbeat = setInterval(() => ws.ping(), 1000)
+    })
+
     ws.on('message', onMessage)
     ws.on('error', onError)
     ws.on('close', onClose)
