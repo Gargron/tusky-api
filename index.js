@@ -6,24 +6,26 @@ import npmlog from 'npmlog'
 import morgan from 'morgan'
 import Sequelize from 'sequelize'
 
-const app = express()
+const app       = express()
 const serverKey = process.env.SERVER_KEY || ''
+const port      = process.env.PORT || 3000
 const wsStorage = {}
 const sequelize = new Sequelize('sqlite://tusky.sqlite', {
-  logging: npmlog.verbose
+  logging: npmlog.verbose,
+  storage: 'db/tusky.sqlite'
 })
 
 const connectForUser = (baseUrl, accessToken, deviceToken) => {
-  const log = (level, message) => npmlog.log(level, `${baseUrl}:${accessToken}`, message)
+  const log = (level, message) => npmlog.log(level, `${baseUrl}:${deviceToken}`, message)
 
   if (typeof wsStorage[`${baseUrl}:${accessToken}`] !== 'undefined') {
-    log('info', `Already registered: ${deviceToken}`)
+    log('info', 'Already registered')
     return
   }
 
   let heartbeat
 
-  log('info', `New registration: ${deviceToken}`)
+  log('info', 'New registration')
 
   const close = () => {
     clearInterval(heartbeat)
@@ -152,6 +154,6 @@ app.post('/unregister', (req, res) => {
   res.sendStatus(201)
 })
 
-app.listen(3000, () => {
-  npmlog.log('info', 'Listening on port 3000')
+app.listen(port, () => {
+  npmlog.log('info', `Listening on port ${port}`)
 })
