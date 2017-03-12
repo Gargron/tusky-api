@@ -45,12 +45,12 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
     }).catch(error => {
       log('error', `Error sending to FCM, status: ${error.response.status}: ${JSON.stringify(error.response.data)}`)
     })
-  })
+  }
 
   const onError = error => {
     log('error', error)
     setTimeout(() => reconnect(), 5000)
-  })
+  }
 
   const onClose = code => {
     if (code === 1000) {
@@ -60,7 +60,7 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
 
     log('error', `Unexpected close: ${code}`)
     setTimeout(() => reconnect(), 5000)
-  })
+  }
 
   const reconnect = () => {
     const ws = new WebSocket(`${baseUrl}/api/v1/streaming/?access_token=${accessToken}&stream=user`)
