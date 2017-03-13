@@ -96,14 +96,12 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
     const ws = new WebSocket(`${baseUrl}/api/v1/streaming/?access_token=${accessToken}&stream=user`)
 
     ws.on('open', () => {
-	  if (ws.readyState != 1) {
-		log('error', `Client state is: ${ws.readyState}`)  
-	  }
-	  else {
-		log('info', 'Connected')
-		heartbeat = setInterval(() => ws.ping(), 1000)
-	  }
-
+      if (ws.readyState != 1) {
+        log('error', `Client state is: ${ws.readyState}`)
+      } else {
+        log('info', 'Connected')
+        heartbeat = setInterval(() => ws.ping(), 1000)
+      }
     })
 
     ws.on('message', onMessage)
@@ -118,14 +116,16 @@ const connectForUser = (baseUrl, accessToken, deviceToken) => {
 
 const disconnectForUser = (baseUrl, accessToken) => {
   Registration.findOne({ where: { instanceUrl: baseUrl, accessToken: accessToken }}).then((registration) => {
-	  if (registration != null) {
-		registration.destroy()
-	  }
-	  })
+    if (registration != null) {
+      registration.destroy()
+    }
+  })
+
   const ws = wsStorage[`${baseUrl}:${accessToken}`]
+
   if (typeof ws !== 'undefined') {
-	    ws.close()
-		delete wsStorage[`${baseUrl}:${accessToken}`]
+    ws.close()
+    delete wsStorage[`${baseUrl}:${accessToken}`]
   }
 }
 
